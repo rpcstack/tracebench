@@ -137,7 +137,8 @@ async fn main() -> Result<(), Probe> {
         let c = loop {
             let attempt = async {
                 let mut c = client(addr, timeout).await?;
-                let req = context(Duration::from_secs(5)).attach(Request::new(root_request(graph, 0)));
+                let req =
+                    context(Duration::from_secs(5)).attach(Request::new(root_request(graph, 0)));
                 c.root(req).await?;
                 Ok::<_, Probe>(c)
             };
@@ -174,14 +175,19 @@ async fn main() -> Result<(), Probe> {
             args.control
         );
         if ok != args.control {
-            failures.push(format!("control {graph}: only {ok}/{} succeeded", args.control));
+            failures.push(format!(
+                "control {graph}: only {ok}/{} succeeded",
+                args.control
+            ));
         }
     }
 
     // 2. Expired deadlines, one per service.
     let mut outcomes: Vec<(String, Outcome)> = Vec::new();
     for (graph, _, c) in &mut roots {
-        let req = expired().await.attach(Request::new(root_request(graph, 9_999)));
+        let req = expired()
+            .await
+            .attach(Request::new(root_request(graph, 9_999)));
         outcomes.push((format!("frontend {graph}"), Outcome::of(c.root(req).await)));
     }
     for spec in &args.targets {
@@ -198,7 +204,9 @@ async fn main() -> Result<(), Probe> {
             (Outcome::EarlyReturn(_), true) => early_returns += 1,
             (Outcome::EarlyReturn(msg), false) => {
                 early_returns += 1;
-                failures.push(format!("{name}: baseline produced a Masa early return: {msg}"));
+                failures.push(format!(
+                    "{name}: baseline produced a Masa early return: {msg}"
+                ));
             }
             (_, true) => failures.push(format!("{name}: expected /EarlyReturn, got {outcome:?}")),
             (_, false) => {}
