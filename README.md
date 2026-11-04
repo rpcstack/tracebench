@@ -50,7 +50,9 @@ scripts/kind-up.sh && scripts/k8s-deploy.sh masa          # Kubernetes (or: base
 ### Quick start: Docker Compose
 
 Needs Docker with Compose v2 and BuildKit. The first build compiles the Rust
-workspace (a few minutes).
+workspace (a few minutes). Dependencies build in a separate cargo-chef layer of
+the Dockerfile, so later builds reuse it; CI persists that layer in the GitHub
+Actions cache.
 
 ```bash
 docker compose up --build                  # baseline, default graph
