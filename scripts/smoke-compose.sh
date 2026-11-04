@@ -18,7 +18,8 @@
 # 5. The probe runs again, then: no panic in any log, no container restart.
 #
 # Environment: COMPOSE_PROJECT_NAME (default rpcstack-tracebench-<mode>),
-# PROBE_EXPECT=masa with MODE=baseline is a negative test: the probe must FAIL.
+# In baseline the probe also runs with --expect masa as a negative control
+# that must FAIL (PROBE FAIL).
 # KEEP_UP=1 to leave the stack running, SKIP_BUILD=1 to reuse the image.
 set -euo pipefail
 
@@ -52,12 +53,23 @@ echo "image mode: $(dc run --rm --no-deps loadgen mode)"
 
 # shellcheck disable=SC2046
 probe() {
-  dc run --rm --no-deps loadgen probe --expect "${PROBE_EXPECT:-$MODE}" --wait-secs 300 \
+  local expect="$1"; shift
+  dc run --rm --no-deps loadgen probe --expect "$expect" --wait-secs 300 \
     $(python3 "$ROOT/scripts/lib/probe_args.py" "$ROOT/deploy/default/deployment.json") "$@"
 }
 
 echo "== policy-liveness probe (expect $MODE)"
-probe | tee "$OUT/probe.txt"
+probe "$MODE" | tee "$OUT/probe.txt"
+if [ "$MODE" = baseline ]; then
+  # Negative control: the masa expectation must fail against a baseline stack,
+  # otherwise the probe cannot tell the two modes apart.
+  echo "== negative control: probe --expect masa must FAIL on baseline"
+  if probe masa > "$OUT/probe-negative.txt" 2>&1; then
+    cat "$OUT/probe-negative.txt"; echo "FAIL: masa probe passed against baseline stack" >&2; exit 1
+  fi
+  grep -q "PROBE FAIL" "$OUT/probe-negative.txt" || { cat "$OUT/probe-negative.txt"; echo "FAIL: negative probe did not report PROBE FAIL" >&2; exit 1; }
+  echo "negative control ok"
+fi
 
 load() { # name -> runs config/smoke/<name>.env, traces in $OUT/<name>.txt
   set -a; . "$ROOT/config/smoke/$1.env"; set +a
@@ -95,7 +107,7 @@ elif [ "${SMOKE_OVERLOAD:-0}" = 1 ]; then
 fi
 
 echo "== probe again (policy state and control requests after the load runs)"
-probe | tee "$OUT/probe-after-overload.txt"
+probe "$MODE" | tee "$OUT/probe-after-overload.txt"
 
 echo "== crash check"
 dc logs --no-color > "$OUT/compose.log" 2>&1

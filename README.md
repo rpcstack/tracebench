@@ -37,6 +37,16 @@ The mode is chosen when the image is built.
 
 Scheduling operates between future polls; there is no forced preemption.
 
+### Deploy in one command
+
+Layout: generated per-graph manifests in `deploy/<graph>/` (`deploy/default`);
+no kustomize overlays.
+
+```bash
+MODE=masa docker compose up --build                       # Compose (omit MODE for baseline)
+scripts/kind-up.sh && scripts/k8s-deploy.sh masa          # Kubernetes (or: baseline)
+```
+
 ### Quick start: Docker Compose
 
 Needs Docker with Compose v2 and BuildKit. The first build compiles the Rust
@@ -117,8 +127,9 @@ phase of real Root requests through the whole graph; the policy-liveness probe
 `/EarlyReturn` in masa mode and never in baseline, so it fails if the policy is
 not wired in); moderate load with zero transport errors and an ok rate of at
 least 0.99; in masa mode an overload burst that must be shed and a recovery
-run; finally no panics and no restarts. `PROBE_EXPECT=masa scripts/smoke-compose.sh baseline`
-demonstrates the probe failing on a baseline stack.
+run; finally no panics and no restarts. In baseline mode the smoke also runs
+the probe with `--expect masa` as a negative control that must fail with
+`PROBE FAIL`, so a probe that cannot tell the modes apart breaks the smoke.
 
 ### Development
 
