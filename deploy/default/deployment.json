@@ -1,0 +1,49 @@
+{
+  "services": {
+    "user-s-14677443": {
+      "ip": "tb-user-s-14677443",
+      "port": 50051,
+      "replicas": 1
+    },
+    "ms-11639": {
+      "ip": "tb-ms-11639",
+      "port": 50051,
+      "replicas": 1
+    },
+    "ms-1329": {
+      "ip": "tb-ms-1329",
+      "port": 50051,
+      "replicas": 1
+    },
+    "ms-27421": {
+      "ip": "tb-ms-27421",
+      "port": 50051,
+      "replicas": 1
+    },
+    "ms-37247": {
+      "ip": "tb-ms-37247",
+      "port": 50051,
+      "replicas": 1
+    },
+    "ms-37691": {
+      "ip": "tb-ms-37691",
+      "port": 50051,
+      "replicas": 1
+    },
+    "ms-52612": {
+      "ip": "tb-ms-52612",
+      "port": 50051,
+      "replicas": 1
+    },
+    "ms-56394": {
+      "ip": "tb-ms-56394",
+      "port": 50051,
+      "replicas": 1
+    },
+    "ms-73106": {
+      "ip": "tb-ms-73106",
+      "port": 50051,
+      "replicas": 1
+    }
+  }
+}

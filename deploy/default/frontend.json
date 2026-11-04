@@ -1,0 +1,11 @@
+[
+  {
+    "service": "user-s-14677443",
+    "ip": "tb-user-s-14677443",
+    "port": 50051,
+    "replicas": 1,
+    "graph": "s-14677443",
+    "slo_ms": 100,
+    "probability": 1.0
+  }
+]

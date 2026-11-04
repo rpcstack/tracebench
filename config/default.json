@@ -1,0 +1,13 @@
+{
+  "callgraph_dirs": ["trace-analysis/graph_branch/S_14677443"],
+  "slo_ms": 100,
+  "slo_ms_by_graph": {},
+  "replicas": { "default": 1, "overrides": {} },
+  "loadgen": {
+    "rps": 200,
+    "duration_secs": 30,
+    "warmup_secs": 0,
+    "max_in_flight": 100,
+    "stats_interval_secs": 2
+  }
+}

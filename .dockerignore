@@ -1,0 +1,14 @@
+target/
+out/
+.git/
+.github/
+tools/
+deploy/
+traces/
+trace-analysis/.venv/
+trace-analysis/**/__pycache__/
+trace-analysis/.pytest_cache/
+trace-analysis/tests/
+trace-analysis/graph_reports/
+trace-analysis/plots/
+trace-analysis/conditional_variants/
