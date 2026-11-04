@@ -17,6 +17,10 @@ path = "src/main.rs"
 name = "tracebench-loadgen"
 path = "src/loadgen.rs"
 
+[[bin]]
+name = "tracebench-probe"
+path = "src/probe.rs"
+
 [features]
 # Policy modes. `baseline` (no features) leaves `masa::DefaultHooks` as
 # `tonic::rpcstack::noop::NoopHooks`. `masa` is the composed Masa policy preset

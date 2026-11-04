@@ -28,9 +28,12 @@ use tonic::{Request, Status};
 
 #[derive(Parser, Debug)]
 struct Args {
-    /// `baseline` or `masa`.
+    /// `baseline` or `masa` (not needed with `--ready-only`).
+    #[arg(long, required_unless_present = "ready_only")]
+    expect: Option<String>,
+    /// Only wait until every frontend answers a Root request, then exit 0.
     #[arg(long)]
-    expect: String,
+    ready_only: bool,
     /// Root (frontend) service as `graph=http://host:port`. Repeatable. Root
     /// requests (control and expired) are sent here.
     #[arg(long = "frontend")]
@@ -109,9 +112,11 @@ async fn expired() -> RootContext {
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> Result<(), Probe> {
     let args = Args::parse();
-    let masa_mode = match args.expect.as_str() {
+    let expect = args.expect.clone().unwrap_or_default();
+    let masa_mode = match expect.as_str() {
         "masa" => true,
         "baseline" => false,
+        _ if args.ready_only => false,
         other => return Err(format!("--expect must be baseline or masa, got {other}").into()),
     };
     if args.frontends.is_empty() {
@@ -146,6 +151,11 @@ async fn main() -> Result<(), Probe> {
             }
         };
         roots.push((graph.clone(), addr.clone(), c));
+    }
+
+    if args.ready_only {
+        println!("ready: {} frontend(s) answer Root requests", roots.len());
+        return Ok(());
     }
 
     // 1. Control: generous SLO, must succeed in both modes.
@@ -196,17 +206,17 @@ async fn main() -> Result<(), Probe> {
     }
     println!(
         "policy-live: {early_returns}/{total} services rejected an expired Masa deadline (expect {})",
-        args.expect
+        expect
     );
 
     if failures.is_empty() {
-        println!("PROBE PASS ({})", args.expect);
+        println!("PROBE PASS ({expect})");
         Ok(())
     } else {
         for f in &failures {
             println!("FAIL: {f}");
         }
-        println!("PROBE FAIL ({})", args.expect);
+        println!("PROBE FAIL ({expect})");
         std::process::exit(1);
     }
 }
