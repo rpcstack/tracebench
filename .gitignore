@@ -5,3 +5,7 @@ __pycache__/
 trace-analysis/graph_reports/
 trace-analysis/plots/
 trace-analysis/conditional_variants/
+/target/
+/out/
+**/*.rs.bk
+.DS_Store
