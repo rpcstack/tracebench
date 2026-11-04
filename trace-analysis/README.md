@@ -50,7 +50,10 @@ uv sync --group dev && uv run pytest   # offline regression tests, a few seconds
    overlap threshold 0.1), see the `metadata` block in each `call_sequence.json`.
 
 3. **Point tracebench at it**: each service directory
-   `graph_branch/S_<id>/` is one entry of `callgraph_dirs` in `tracebench.json`.
+   `graph_branch/S_<id>/` is one entry of `callgraph_dirs` in a tracebench graph
+   config (`config/default.json` in the repository root, see the
+   [top-level README](../README.md#choosing-or-preparing-a-graph)). Rebuild the
+   image afterwards, graph directories are copied into it.
 
 ### Graph directory contract
 
