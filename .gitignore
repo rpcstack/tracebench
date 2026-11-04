@@ -1,0 +1,7 @@
+/traces/
+__pycache__/
+.venv/
+.pytest_cache/
+trace-analysis/graph_reports/
+trace-analysis/plots/
+trace-analysis/conditional_variants/

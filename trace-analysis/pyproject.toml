@@ -1,0 +1,27 @@
+[project]
+name = "tracebench-trace-analysis"
+version = "0.1.0"
+description = "Alibaba cluster-trace-microservices-v2022 call-graph analysis and preparation for tracebench"
+requires-python = ">=3.10"
+dependencies = [
+    "matplotlib>=3.10",
+    "networkx>=3.4",
+    "numpy>=2.2",
+    "pandas>=2.2",
+    "tqdm>=4.67",
+]
+
+[project.optional-dependencies]
+# Only needed to lay out and draw graphs (analyze.py, quickcheck.py,
+# find_shared_nodes.py call networkx's graphviz_layout). Requires the system
+# graphviz library and headers to build.
+plots = ["pygraphviz>=1.14"]
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
