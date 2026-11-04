@@ -7,7 +7,8 @@
 # Creates the kind cluster + registry if needed (scripts/kind-up.sh), deploys
 # MODE (scripts/k8s-deploy.sh), then runs the policy-liveness probe, moderate
 # load, an overload burst and a recovery run. Environment: KIND_CLUSTER,
-# PROBE_EXPECT=masa with MODE=baseline is a negative test: the probe must FAIL.
+# In baseline the probe also runs with --expect masa as a negative control
+# that must FAIL (PROBE FAIL).
 # REGISTRY_PORT, SKIP_DEPLOY=1, KEEP_UP=1 (otherwise the namespace is deleted;
 # the cluster is kept, remove it with scripts/kind-down.sh).
 set -euo pipefail
@@ -88,10 +89,19 @@ restarts() {
 
 echo "image mode: $(run_job tb-mode -- mode)"
 run_probe() {
-  run_job "$1" -- probe --expect "${PROBE_EXPECT:-$MODE}" --wait-secs 300 "${PROBE_ARGS[@]}"
+  run_job "$1" -- probe --expect "$2" --wait-secs 300 "${PROBE_ARGS[@]}"
 }
 echo "== policy-liveness probe (expect $MODE)"
-run_probe tb-probe | tee "$OUT/probe.txt"
+run_probe tb-probe "$MODE" | tee "$OUT/probe.txt"
+if [ "$MODE" = baseline ]; then
+  # Negative control: the masa expectation must fail against a baseline stack.
+  echo "== negative control: probe --expect masa must FAIL on baseline"
+  if run_probe tb-probe-negative masa > "$OUT/probe-negative.txt" 2>&1; then
+    cat "$OUT/probe-negative.txt"; echo "FAIL: masa probe passed against baseline stack" >&2; exit 1
+  fi
+  grep -q "PROBE FAIL" "$OUT/probe-negative.txt" || { cat "$OUT/probe-negative.txt"; echo "FAIL: negative probe did not report PROBE FAIL" >&2; exit 1; }
+  echo "negative control ok"
+fi
 restarts > "$OUT/restarts.before"
 
 load() { # name -> config/smoke/<name>.env; traces in $OUT/<name>.txt
@@ -123,7 +133,7 @@ elif [ "${SMOKE_OVERLOAD:-0}" = 1 ]; then
 fi
 
 echo "== probe again (policy state and control requests after the load runs)"
-run_probe tb-probe-after | tee "$OUT/probe-after-overload.txt"
+run_probe tb-probe-after "$MODE" | tee "$OUT/probe-after-overload.txt"
 
 echo "== crash check"
 kc -n "$NS" logs -l "$SELECTOR" --all-containers --tail=-1 --prefix > "$OUT/pods.log"
